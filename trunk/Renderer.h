@@ -87,3 +87,4 @@ public:
 };
 
 #endif /* RENDERINGINTERFACE_HPP_ */
+

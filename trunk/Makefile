@@ -38,3 +38,4 @@ Particles.o: Particles.h Particles.cpp Vec.h
 clean:
 	rm -f  ./*~ ./sim $(OBJ) 
 
+

@@ -374,3 +374,4 @@ void capture_frame(unsigned int framenum) {
     //function to store pRGB in a file named count
     delete pRGB;
 }
+

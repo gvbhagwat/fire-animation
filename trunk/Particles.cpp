@@ -6,11 +6,15 @@
  */
 
 #include "Particles.h"
+#include "Dimensions.h"
 
 Particles::Particles(Vec2d& position) {
     
     this->pos[0] = position[0];
     this->pos[1] = position[1];
+    
+    this->timeAlive = 0.0;
+    //this->temp = 
     
 }
 
@@ -19,4 +23,5 @@ Particles::Particles(Vec2d& position) {
 
 Particles::~Particles() {
 }
+
 
