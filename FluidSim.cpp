@@ -4,6 +4,7 @@
 #include "Vec.h"
 #include "Utils.h"
 #include "Particles.h"
+#include "Dimensions.h"
 
 
 #include <iostream>
@@ -151,10 +152,10 @@ void FluidSim::initializeFluidBody(int choice) {
                     Vec2d pt(xpos, ypos);
                     //rGrid.markerParticles.push_back(pt);
                     Particles* p = new Particles(pt);
-                    if(p != NULL)
+                    if (p != NULL)
                         rGrid.fireParticles.push_back(p);
                     else
-                        cout<<"BIG ERROR";
+                        cout << "BIG ERROR";
                 }
 
             }
@@ -184,10 +185,10 @@ void FluidSim::initializeFluidBody(int choice) {
                     Vec2d pt(xpos, ypos);
                     //rGrid.markerParticles.push_back(pt);
                     Particles* p = new Particles(pt);
-                    if(p != NULL)
+                    if (p != NULL)
                         rGrid.fireParticles.push_back(p);
                     else
-                        cout<<"BIG ERROR";
+                        cout << "BIG ERROR";
                 }
 
             }
@@ -197,7 +198,7 @@ void FluidSim::initializeFluidBody(int choice) {
             // DOUBLE_DAM_BREAK
         case 2:
             lowerBound_x = 0.3;
-            lowerBound_y = 1.5*rGrid.dx + rGrid.dx / 2.0;
+            lowerBound_y = 1.5 * rGrid.dx + rGrid.dx / 2.0;
             upperBound_x = 0.7;
             //upperBound_x = 0.7;
             upperBound_y = 0.15;
@@ -215,10 +216,10 @@ void FluidSim::initializeFluidBody(int choice) {
                     Vec2d pt(xpos, ypos);
                     //rGrid.markerParticles.push_back(pt);
                     Particles* p = new Particles(pt);
-                    if(p != NULL)
+                    if (p != NULL)
                         rGrid.fireParticles.push_back(p);
                     else
-                        cout<<"BIG ERROR";
+                        cout << "BIG ERROR";
                 }
 
             }
@@ -317,7 +318,7 @@ void FluidSim::advance(double timestep) {
         dt = cfl();
         if (t + dt > timestep)
             dt = timestep - t;
-        
+
         this->initializeFluidBody(2);
 
         // advection
@@ -377,23 +378,29 @@ void FluidSim::clearMarkedFluidCells() {
  * @param grid
  */
 void FluidSim::advectParticles() {
-    if(SIM_LOG)
+    if (SIM_LOG)
         std::cout << "--SIMLOG-- Particles passively advected" << std::endl;
-    
+
     rGrid.advectionWeights.clear();
 
-     
-    for (unsigned int fp = 0; fp < rGrid.fireParticles.size() ; ++fp) {
-        rGrid.fireParticles[fp]->pos = rGrid.trace_rk2(rGrid.fireParticles[fp]->pos, dt);
 
-        if ((rGrid.fireParticles[fp]->pos[0] / rGrid.dx) > rGrid.ni - 1)
-            rGrid.fireParticles[fp]->pos[0] = ((rGrid.ni - 1) * rGrid.dx) - rGrid.dx / 2.0;
-        if ((rGrid.fireParticles[fp]->pos[1] / rGrid.dx) > rGrid.nj - 1)
-            rGrid.fireParticles[fp]->pos[1] = ((rGrid.nj - 1) * rGrid.dx) - rGrid.dx / 2.0;
-        
-        
-        
-       
+    for (unsigned int fp = 0; fp < rGrid.fireParticles.size(); ++fp) {
+
+        rGrid.fireParticles[fp]->timeAlive += dt;
+
+        if (rGrid.fireParticles[fp]->timeAlive > FLAME_HEIGHT) {
+
+            rGrid.fireParticles.erase(rGrid.fireParticles.begin() + fp);
+
+        } else {
+            rGrid.fireParticles[fp]->pos = rGrid.trace_rk2(rGrid.fireParticles[fp]->pos, dt);
+
+            if ((rGrid.fireParticles[fp]->pos[0] / rGrid.dx) > rGrid.ni - 1)
+                rGrid.fireParticles[fp]->pos[0] = ((rGrid.ni - 1) * rGrid.dx) - rGrid.dx / 2.0;
+            if ((rGrid.fireParticles[fp]->pos[1] / rGrid.dx) > rGrid.nj - 1)
+                rGrid.fireParticles[fp]->pos[1] = ((rGrid.nj - 1) * rGrid.dx) - rGrid.dx / 2.0;
+        }
+
     }
 }
 
@@ -402,10 +409,10 @@ void FluidSim::advectParticles() {
  * @param grid
  */
 void FluidSim::advect() {
-    if(SIM_LOG)
+    if (SIM_LOG)
         std::cout << "--SIMLOG-- normal advection routine finished" << std::endl;
-    
-    
+
+
 
     //semi-Lagrangian advection on u-component of velocity
 
@@ -428,10 +435,10 @@ void FluidSim::advect() {
     // x is columns in x axis..
     // information to the right
 
-    
+
     rGrid.advectionWeights.clear();
     //std::cout<<"step_Break"<<endl;
-    
+
     // v has extra information in y direction or in rows
     for (int y = 0; y < rGrid.ni + 1; ++y) for (int x = 0; x < rGrid.nj; ++x) {
             Vec2d pos(x * rGrid.dx, (y + 0.5) * rGrid.dx);
@@ -441,9 +448,9 @@ void FluidSim::advect() {
 
     //move update velocities into u/v vectors
     rGrid.u = rGrid.temp_u;
-    rGrid.v = rGrid.temp_v;  
-    
-    
+    rGrid.v = rGrid.temp_v;
+
+
 }
 
 /**
@@ -462,14 +469,14 @@ void FluidSim::addForces() {
         for (int x = 0; x < rGrid.nj; x++) {
             if (rGrid.marker(y, x) == FLUID)
                 rGrid.v(y, x) += dt * 9.8;
-            
-            
-            
+
+
+
         }
 
-    
-    
-    if(SIM_LOG)
+
+
+    if (SIM_LOG)
         std::cout << "--SIMLOG-- forces added " << std::endl;
 }
 
@@ -513,7 +520,7 @@ void FluidSim::applyBoundaryConditions() {
  * @param grid
  */
 void FluidSim::project() {
-    if(SIM_LOG)
+    if (SIM_LOG)
         std::cout << "--SIMLOG-- Fluid Made incompressible done" << std::endl;
     // displayverticalVelocities();
     findDivergence();
@@ -528,7 +535,6 @@ void FluidSim::project() {
     //  displayPressure();
     applyPressure();
 }
-
 
 /**
  * 
@@ -785,16 +791,16 @@ void FluidSim::solvePressure() {
     //   cout << "maximum r = " << findRInform() << " tol: " << tol << endl;
     if (findRInform() == 0.0)
         return;
-    
+
     applyPreconditioner();
-    
+
     this->copyztos();
-    
+
     double rho = zdotr();
-    
+
     if (rho == 0.0)
         return;
-    
+
     for (int iter = 0; iter < 100; iter++) {
         applyA();
         double alpha = rho / zdots();
@@ -1220,3 +1226,4 @@ void FluidSim::computeWeights() {
 //
 //
 //}
+

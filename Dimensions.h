@@ -19,6 +19,8 @@
 #define DENSITY_HOTGAS 0.01
 
 
+#define FLAME_HEIGHT 0.5
+
 //for testing purposes only
 #define V_MAX 70
 #define U_MAX 70
@@ -38,3 +40,4 @@
 
 
 #endif
+

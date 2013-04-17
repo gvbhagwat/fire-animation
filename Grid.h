@@ -19,6 +19,7 @@
 #include "Particles.h"
 
 #include <vector>
+#include <list>
 #include <iostream>
 using namespace std;
 
@@ -66,6 +67,10 @@ public:
 
     /// @brief marker cells
     matrix<int> marker;
+    
+    /// @brief temperature for the flame
+    matrix<double> temperature;
+    
 
     /// @brief Vec2d(A double array of size=2) storing maxVelocity components maxVelocity[0] => u, maxVelocity[1] => v
     Vec2d maxVelocity;

@@ -519,13 +519,21 @@ void Renderer::drawMarkerParticles(Grid* rGrid) {
     
     for (unsigned int i = 0; i < rGrid->fireParticles.size(); i++) {
         //Vec2d pt = rGrid->markerParticles[i];
+        
+        //if (rGrid->fireParticles[i]->timeAlive < FLAME_HEIGHT){
         Vec2d pt = rGrid->fireParticles[i]->pos;
         pt = pt / scaleFactor;
         glPointSize(2);
         glBegin(GL_POINTS);
-        glColor3f(1.0, 0.0, 1.0);
+        if(rGrid->fireParticles[i]->timeAlive > 0.0 && rGrid->fireParticles[i]->timeAlive < 0.1)
+              glColor3f(1.0,0.0,0.0);
+        else if (rGrid->fireParticles[i]->timeAlive > 0.1 && rGrid->fireParticles[i]->timeAlive < 0.18)
+              glColor3f(255.0/255.0, 140.0/255.0, 0.0);
+        else
+            glColor3f(1.0,1.0,0.0);
         glVertex2d(pt[0], pt[1]);
         glEnd();
+        //}
     }
     
 
