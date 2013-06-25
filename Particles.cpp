@@ -6,7 +6,6 @@
  */
 
 #include "Particles.h"
-#include "Dimensions.h"
 
 Particles::Particles(Vec2d& position) {
     
@@ -23,5 +22,4 @@ Particles::Particles(Vec2d& position) {
 
 Particles::~Particles() {
 }
-
 

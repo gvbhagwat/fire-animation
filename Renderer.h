@@ -33,6 +33,7 @@ public:
     bool optionDrawFluidBody;
     bool optionDrawFlipParticles;
     bool optionHighlightFluidCells;
+	bool optionHighlightFluidBoundaryCells;
     bool optionDisplayDivergence;
     bool optionDisplayCustomDivergence;
     
@@ -60,6 +61,7 @@ public:
     void drawPressure(Grid* rGrid);
     
     void highlightFluidCells(Grid* rGrid);
+	void highlightFluidBoundaryCells(Grid* rGrid);
     
     void displayDivergence(Grid* grid);
     
@@ -87,4 +89,3 @@ public:
 };
 
 #endif /* RENDERINGINTERFACE_HPP_ */
-

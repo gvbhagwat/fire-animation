@@ -67,6 +67,12 @@ public:
 
     /// @brief marker cells
     matrix<int> marker;
+	
+	/// @brief boundary cells
+	matrix<int> boundary;
+
+	///@brief levelSetPhi
+	matrix<int> levelSetPhi;
     
     /// @brief temperature for the flame
     matrix<double> temperature;

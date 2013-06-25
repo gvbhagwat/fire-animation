@@ -9,7 +9,7 @@
 #include "Utils.h"
 #include "Vec.h"
 #include "MetaConfig.h"
-#include "Dimensions.h"
+#include "sim.h"
 #include "Grid.h"
 
 #include <iostream>
@@ -245,4 +245,3 @@ void assignTestValues(Grid* rGrid) {
 
 
 }
-
