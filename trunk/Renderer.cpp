@@ -6,7 +6,7 @@
  */
 
 #include "Renderer.h"
-#include "Dimensions.h"
+#include "sim.h"
 #include "MetaConfig.h"
 
 //implicit inclusion of the Grid class from Grid.hpp
@@ -39,6 +39,7 @@ Renderer::Renderer() {
 
     this->optionDrawFlipParticles = false;
     this->optionHighlightFluidCells = false;
+	this->optionHighlightFluidBoundaryCells = false;
     this->optionDrawPressure = false;
     this->optionDrawVelocity = false;
     this->optionDrawSimBoundary = false;
@@ -754,6 +755,35 @@ void Renderer::highlightFluidCells(Grid* rGrid) {
         for (int j = 0; j < rGrid->nj; j++) {
 
             if (rGrid->marker(i, j) == 1) {
+                red = green = blue = 1.0;
+                // cout<<"found at i = "<<i<<" and j = "<<j<<endl;
+            }
+
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glBegin(GL_POLYGON);
+            glColor3d(red, green, blue);
+            glVertex3d(j * (cellSize), (cellSize + cellSize * i), 0.0);
+            glVertex3d(j * (cellSize), (0.0 + cellSize * i), 0.0);
+            glVertex3d((j + 1)*(cellSize), (0.0 + cellSize * i), 0.0);
+            glVertex3d((j + 1)*(cellSize), (cellSize + cellSize * i), 0.0);
+            glEnd();
+
+            red = green = blue = 0.0;
+        }
+    }
+    if (RENDER_LOG)
+        std::cout << "--RENDER--\tpressure NOT drawn yet" << std::endl;
+
+}
+
+void Renderer::highlightFluidBoundaryCells(Grid* rGrid){
+
+    double red = 0.0, green = 0.0, blue = 0.0;
+
+    for (int i = 0; i < rGrid->ni; i++) {
+        for (int j = 0; j < rGrid->nj; j++) {
+
+            if (rGrid->boundary(i, j) == 1) {
                 red = green = blue = 1.0;
                 // cout<<"found at i = "<<i<<" and j = "<<j<<endl;
             }

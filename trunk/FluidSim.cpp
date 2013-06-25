@@ -4,7 +4,7 @@
 #include "Vec.h"
 #include "Utils.h"
 #include "Particles.h"
-#include "Dimensions.h"
+#include "sim.h"
 
 
 #include <iostream>
@@ -542,13 +542,16 @@ void FluidSim::project() {
  */
 void FluidSim::markFluidCells() {
 
-    rGrid.marker.clear();
+    // first clear all the past marker cells
+	rGrid.marker.clear();
 
-    // first detect potential cell from the particles themselves
+	// clear the boundary markers
+	rGrid.boundary.clear();
+
+    // first detect potential cells from the particles themselves
 
     for (unsigned int i = 0; i < rGrid.fireParticles.size(); i++) {
         Vec2d pos(rGrid.fireParticles[i]->pos / rGrid.dx);
-
         int x = int(pos[0]);
         int y = int(pos[1]);
 
@@ -558,10 +561,16 @@ void FluidSim::markFluidCells() {
     // Updating fluid marker cells on basis of eight neighbor count
     // for internal cells i.e. within the boundary
 
+
     int eight_neighbor_count = 0;
+    int four_neighbor_count = 0;
+
     for (int y = 1; y < rGrid.ni - 1; y++)
         for (int x = 1; x < rGrid.nj - 1; x++) {
-            eight_neighbor_count =
+
+        	if( rGrid.marker(y,x) == FLUID)
+        	{
+        		eight_neighbor_count =
                     int(rGrid.marker(y + 1, x) == FLUID) +
                     int(rGrid.marker(y - 1, x) == FLUID) +
                     int(rGrid.marker(y, x - 1) == FLUID) +
@@ -570,15 +579,21 @@ void FluidSim::markFluidCells() {
                     int(rGrid.marker(y - 1, x) == FLUID) +
                     int(rGrid.marker(y, x - 1) == FLUID) +
                     int(rGrid.marker(y, x + 1) == FLUID);
+				
+				four_neighbor_count = int(rGrid.marker(y + 1, x + 1) == FLUID) +
+									  int(rGrid.marker(y - 1, x + 1) == FLUID) +
+									  int( rGrid.marker(y + 1, x - 1) == FLUID) +
+	                    			  int(rGrid.marker(y - 1, x - 1) == FLUID);
 
-            if (rGrid.marker(y + 1, x + 1) != EMPTY &&
-                    rGrid.marker(y - 1, x + 1) != EMPTY &&
-                    rGrid.marker(y + 1, x - 1) != EMPTY &&
-                    rGrid.marker(y - 1, x - 1) != EMPTY)
-                rGrid.marker(y, x) = FLUID;
+        		if (eight_neighbor_count >= 7 )
+        			rGrid.marker(y, x) = FLUID;
 
-            else if (eight_neighbor_count >= 7)
-                rGrid.marker(y, x) = FLUID;
+        		if (four_neighbor_count < 4 )
+        			rGrid.boundary(y,x) = FLUID;
+
+
+        }
+
         }
 
     // set boundary cell markers to SOLID
@@ -1226,4 +1241,3 @@ void FluidSim::computeWeights() {
 //
 //
 //}
-

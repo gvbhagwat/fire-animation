@@ -66,6 +66,9 @@ void Grid::initializeGrid() {
 
     // another information stored at the center of the cell hence ni x nj
     marker.resize(ni + extra, nj + extra);
+	this->boundary.resize(ni + extra, nj +extra);
+	this->boundary.resize(ni + extra, nj + extra);
+
 
     // myown test matrices
 

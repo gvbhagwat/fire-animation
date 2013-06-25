@@ -11,22 +11,26 @@
 #include <cmath>
 
 // Solver Headers
+#include "sim.h"
 #include "Renderer.h"
 #include "Grid.h"
 #include "GridTest.h"
 #include "FluidSim.h"
-#include "Dimensions.h"
-#include "MetaConfig.h"
 
 using namespace std;
 
+
+
+extern "C"{
+	void config_init(const char*);
+}
 
 // Frame Capturing Variables and declarations
 
 void capture_frame(unsigned int framenum);
 
-int SCREEN_WIDTH= GRID_NJ * PHYSICAL_WIDTH ;
-int SCREEN_HEIGHT= GRID_NI * PHYSICAL_HEIGHT;
+int SCREEN_WIDTH;
+int SCREEN_HEIGHT;
 
 
 bool recording=false;
@@ -131,6 +135,10 @@ void display() {
     if (renderObj->optionHighlightFluidCells) {
         renderObj->highlightFluidCells(grid);
     }
+    
+	if (renderObj->optionHighlightFluidBoundaryCells) {
+        renderObj->highlightFluidBoundaryCells(grid);
+    }
 
     if (renderObj->optionDisplayDivergence) {
         renderObj->displayDivergence(grid);
@@ -230,6 +238,12 @@ void keyboard(unsigned char key, int x, int y) {
         case 'H':
             renderObj->optionHighlightFluidCells = false;
             break;
+        case 'b':
+            renderObj->optionHighlightFluidBoundaryCells = true;
+            break;
+        case 'B':
+            renderObj->optionHighlightFluidBoundaryCells = false;
+            break;
         case 'p':
             renderObj->optionDrawPressure = true;
             break;
@@ -299,7 +313,12 @@ void keyboard(unsigned char key, int x, int y) {
  */
 int main(int argc, char* argv[]) {
 
-    // Create all the objects and define the fluid
+    config_init(argv[1]);
+		// Create all the objects and define the fluid
+
+	SCREEN_WIDTH= GRID_NJ * PHYSICAL_WIDTH ;
+	SCREEN_HEIGHT= GRID_NI * PHYSICAL_HEIGHT;
+
     init();
 
     if (CLASS_TESTING_MODE == true)
@@ -374,4 +393,3 @@ void capture_frame(unsigned int framenum) {
     //function to store pRGB in a file named count
     delete pRGB;
 }
-
