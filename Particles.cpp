@@ -8,6 +8,8 @@
 #include "Particles.h"
 
 Particles::Particles(Vec2d& position) {
+
+	this->temp = this->y = 0.0;
     
     this->pos[0] = position[0];
     this->pos[1] = position[1];

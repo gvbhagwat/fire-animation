@@ -122,6 +122,8 @@ public:
         if (META_LOG)
             std::cout << "--META--\tConstructor\tGrid" << std::endl;
 
+        this->dx = 0.0;
+        this->particleRadius = 0.0;
         this->ni = ni;
         this->nj = nj;
         this->phyWidth = phyWidth;
@@ -152,6 +154,8 @@ public:
      */
     Vec2d getVelocity(const Vec2d& position);
     
+    double getLevelSetPhi(const Vec2d& position);
+
     Vec2d trace_rk2(const Vec2d& position, double dt);
         
     

@@ -10,6 +10,10 @@
 #include <fstream>
 #include <cmath>
 
+// util headers
+#include "Vec.h"
+#include "Utils.h"
+
 // Solver Headers
 #include "sim.h"
 #include "Renderer.h"
@@ -140,7 +144,11 @@ void display() {
         renderObj->highlightFluidBoundaryCells(grid);
     }
 
-    if (renderObj->optionDisplayDivergence) {
+	if (renderObj->optionDrawLevelSetPhi){
+	        renderObj->drawLevelSetPhi(grid);
+	}
+
+	if (renderObj->optionDisplayDivergence) {
         renderObj->displayDivergence(grid);
     }
 
@@ -244,6 +252,13 @@ void keyboard(unsigned char key, int x, int y) {
         case 'B':
             renderObj->optionHighlightFluidBoundaryCells = false;
             break;
+        case 'l':
+            renderObj->optionDrawLevelSetPhi = true;
+            break;
+        case 'L':
+            renderObj->optionDrawLevelSetPhi = false;
+             break;
+
         case 'p':
             renderObj->optionDrawPressure = true;
             break;
