@@ -65,13 +65,9 @@ void Grid::initializeGrid() {
     temp_pressure.resize(ni + extra, nj + extra, false);
 
     // another information stored at the center of the cell hence ni x nj
-    marker.resize(ni + extra, nj + extra);
+    this->marker.resize(ni + extra, nj + extra);
 	this->boundary.resize(ni + extra, nj +extra);
-	this->boundary.resize(ni + extra, nj + extra);
-
-
-    // myown test matrices
-
+	this->levelSetPhi.resize(ni+extra, nj+extra);
 
 
     // next come the pressure solve matrices
@@ -91,6 +87,8 @@ void Grid::initializeGrid() {
 
     // for diagnostic purposes
 
+    /*
+
     this->customRhs.resize(ni + extra, nj + extra);
     this->diagnose_u_rhs.resize(ni + extra, nj + extra);
     this->diagnose_v_rhs.resize(ni + extra, nj + extra);
@@ -105,10 +103,12 @@ void Grid::initializeGrid() {
     this->searchS.resize(ni + extra, nj + extra);
     this->auxillaryZ.resize(ni + extra, nj + extra);
 
+    */
+
     this->advectionWeights.resize(ni + 3 + extra, nj + 3 + extra);
 
     // particle radius for particle tracking and maxVelocity 
-    // simple initialization
+
     particleRadius = dx / sqrt(2.0);
     maxVelocity[0] = maxVelocity[1] = 0.0;
 
@@ -190,6 +190,48 @@ Vec2d Grid::getVelocity(const Vec2d& position) {
 
     return Vec2d(u_value, v_value);
 }
+
+double Grid::getLevelSetPhi(const Vec2d& position){
+    if (META_LOG)
+        std::cout << "--META--\tFunctionCall\tRenderer::getVelocity"
+            << std::endl;
+
+    int i, j;
+    double fx, fy;
+
+    Vec2d posX = position / dx - Vec2d(0.0, 0.5);
+
+    // gets the i,j value for a given position and fraction value
+    // gets the fx, fy to used in interpolation.
+
+    get_barycentric(posX[0], i, fx, 0, ni);
+    get_barycentric(posX[1], j, fy, 0, nj);
+
+    //    cout<<"Initial Position ="<<position[0]<<" and "<<position[1]<<endl;
+    //    cout<<"posX value = "<<posX[0]<<" and "<<posX[1]<<endl;
+    //    cout<<"I_VALUE for u "<< i <<"J_VALUE for u"<< j<< endl;
+
+
+    double phi_value = bilerp(
+            levelSetPhi(i, j), levelSetPhi(i + 1, j),
+            levelSetPhi(i, j + 1), levelSetPhi(i + 1, j + 1),
+            fx, fy);
+
+    //    cout<<"u(i,j) --" << u(i,j)<<endl;
+    //    cout<<"u(i+1,j) --" << u(i+1,j)<<endl;
+    //    cout<<"u(i,j+1) --" << u(i,j+1)<<endl;
+    //    cout<<"u(i+1,j+1) --" << u(i+1,j+1)<<endl;
+    //    cout<<" fx = "<<fx<<" and "<<" fy = "<<fy<<endl;
+
+    //    cout<<"posY value = "<<posY[0]<<" and "<<posY[1]<<endl;
+    //    cout<<"I_VALUE for v "<< i <<"J_VALUE for v"<< j<< endl;
+    //
+
+    return phi_value;
+
+}
+
+
 
 Vec2d Grid::trace_rk2(const Vec2d& position, double dt) {
     Vec2d velocity = getVelocity(position);

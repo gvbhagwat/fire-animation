@@ -26,23 +26,32 @@ class Renderer {
 public:
 
     int cellSize;
+
+    //draw simulation entities
     bool optionDrawVelocity;
     bool optionDrawGridCells;
     bool optionDrawSimBoundary;
     bool optionDrawPressure;
     bool optionDrawFluidBody;
     bool optionDrawFlipParticles;
+    bool optionDrawLevelSetPhi;
+
+    // marker cells
     bool optionHighlightFluidCells;
 	bool optionHighlightFluidBoundaryCells;
+
+	// diagnostic purposes
     bool optionDisplayDivergence;
+    bool optionDiagnoseDivergence_uComp;
+    bool optionDiagnoseDivergence_vComp;
+
+
+
+
     bool optionDisplayCustomDivergence;
-    
-    // diagnostic purposes
     bool optionDiagnoseCustomDivergence_uComp;
     bool optionDiagnoseCustomDivergence_vComp;
     
-    bool optionDiagnoseDivergence_uComp;
-    bool optionDiagnoseDivergence_vComp;
     
     Renderer();
     virtual
@@ -58,10 +67,13 @@ public:
 
     void drawFluidBody(Grid* rGrid);
 
+    void drawLevelSetPhi(Grid* grid);
+
     void drawPressure(Grid* rGrid);
     
     void highlightFluidCells(Grid* rGrid);
-	void highlightFluidBoundaryCells(Grid* rGrid);
+
+    void highlightFluidBoundaryCells(Grid* grid);
     
     void displayDivergence(Grid* grid);
     

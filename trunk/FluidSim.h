@@ -29,7 +29,10 @@ public:
     FluidSim(Grid& grid) : rGrid(grid) {
         if (META_LOG)
             std::cout << "--META--\tConstructor\tFluidSim" << std::endl;
-        //initialize(startTime, endTime, rGrid);
+
+        //invalid value at initialization.. to be correctly given by the initialize()
+        this->startTime = this->endTime = this->dt = -1.0;
+
     }
 
     ~FluidSim() {
@@ -63,54 +66,63 @@ protected:
     /**
      * Advection routine.. encapsulates algorithm FLIP/PIC or simple
      * semi-Lagrangian advection
-     * @param grid
+     *
      */
     void advect();
 
     /**
      * Add gravitational or buoyancy forces through out the domain
      * depending upon type of fluid
-     * @param grid
+     *
      */
     void addForces();
 
     /**
-     * Make fluids incompressible.
+     * @brief Make fluids incompressible.
      * Modified Incomplete Cholesky Preconditioned Conjugate Gradient Algorithm.
-     * @param grid
+     *
      */
     void project();
 
-    void myProject();
 
 
     /**
-     * The CFL condition calculates for minimum timestep
-     * @param grid
+     * @brief The CFL condition calculates for minimum timestep
      * @return timestep
      */
     double cfl();
 
     /**
      * PARTICLE BASED FLUID TRACING
-     * @param grid
+     *
      */
     void advectParticles();
 
     /**
-     * The marker and cell method's marker routines
-     * @param grid
+     * @brief The marker and cell method's marker routines
+     *
      */
     void markFluidCells();
 
+    /**
+     * @brief construct level sets
+     *
+     */
+    void constructLevelSetPhi();
 
     void applyBoundaryConditions();
 
     /**
-     * @param grid
+     *
      */
     void markSolidCells();
+
+    /**
+     *
+     */
     void clearMarkedFluidCells();
+
+
 
 
 
@@ -118,8 +130,11 @@ protected:
     void constrainVelocity();
 
 
-    // HELPER FUNCTIONS
 
+
+
+    void myProject();
+    // HELPER FUNCTIONS
     void calculateNegativeDivergence();
     void formCoefficientMatrixA();
     void formMyPreConditioner();
