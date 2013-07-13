@@ -12,6 +12,7 @@
 //implicit inclusion of the Grid class from Grid.hpp
 
 #include <cmath>
+#include <cstdlib>
 #include <GL/glut.h>
 #include <GL/glu.h>
 #include <iostream>
@@ -72,15 +73,6 @@ void Renderer::drawSimulationEnitites(Grid* rGrid) {
 	if (META_LOG)
 		std::cout << "--META--\tFunctionCall\tRenderer::drawSimBoundary"
 				<< std::endl;
-
-	for (unsigned int i = 0; i < rGrid->fireParticles.size(); i++) {
-		Vec2d pos(rGrid->fireParticles[i]->pos / rGrid->dx);
-
-		int x = int(pos[0]);
-		int y = int(pos[1]);
-
-		rGrid->marker(y, x) = 1; // means fluid cells
-	}
 
 	double red = 0.0, green = 0.0, blue = 0.0;
 
@@ -507,8 +499,8 @@ void Renderer::displayDiagnoseCustomDivergence_vComp(Grid* rGrid) {
 /**************************************************************************
  * THE divergence function and related diagnostics
  **************************************************************************
- * 1. displayDivergence
- * 2. displayCustomDivergence
+ * 1. drawMarkerParticles
+ * 2. drawFlipParticles
  * 3. displayDiagnoseCustomDivergence_uComp(Grid* rGrid);
  * 4. displayDiagnoseCustomDivergence_vComp(Grid* rGrid);
  * 5. displayDiagnoseDivergence_vComp(Grid* rGrid);
@@ -520,24 +512,103 @@ void Renderer::drawMarkerParticles(Grid* rGrid) {
 	double scaleFactor = rGrid->dx / cellSize;
 
 	for (unsigned int i = 0; i < rGrid->fireParticles.size(); i++) {
-		//Vec2d pt = rGrid->markerParticles[i];
 
-		//if (rGrid->fireParticles[i]->timeAlive < FLAME_HEIGHT){
+		double range_max = FLAME_HEIGHT;
+
 		Vec2d pt = rGrid->fireParticles[i]->pos;
 		pt = pt / scaleFactor;
 		glPointSize(2);
 		glBegin(GL_POINTS);
-		if (rGrid->fireParticles[i]->timeAlive > 0.0
-				&& rGrid->fireParticles[i]->timeAlive < 0.1)
-			glColor3f(1.0, 0.0, 0.0);
-		else if (rGrid->fireParticles[i]->timeAlive > 0.1
-				&& rGrid->fireParticles[i]->timeAlive < 0.18)
+
+		if (rGrid->fireParticles[i]->timeAlive > 0.00
+				&& rGrid->fireParticles[i]->timeAlive
+						< (85.0 / 255.0) * range_max)
+			//glColor3f(0.1, 0.1, 0.1);
+			glColor3f(255.0 / 255.0, 0.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive > (85.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (108.0 / 255.0) * range_max)
+			//glColor3f(255.0 / 255.0, 0.0, 0.0);
+			glColor3f(255.0 / 255.0, 69.0 / 255.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (108.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (127.0 / 255.0) * range_max)
+			//glColor3f(255.0 / 255.0, 69.0 / 255.0, 0.0);
+			glColor3f(255.0 / 255.0, 127.0 / 255.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (127.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (132.0 / 255.0) * range_max)
+			//glColor3f(255.0 / 255.0, 127.0 / 255.0, 0.0);
 			glColor3f(255.0 / 255.0, 140.0 / 255.0, 0.0);
-		else
-			glColor3f(1.0, 1.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (132.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (140.0 / 255.0) * range_max)
+			//glColor3f(255.0 / 255.0, 140.0 / 255.0, 0.0);
+			glColor3f(255.0 / 255.0, 165.0 / 255.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (140.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (157.0 / 255.0) * range_max)
+			//glColor3f(255.0 / 255.0, 165.0 / 255.0, 0.0);
+			glColor3f(255.0 / 255.0, 215.0 / 255.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (157.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (170.0 / 255.0) * range_max)
+			//glColor3f(255.0 / 255.0, 215.0 / 255.0, 0.0);
+			glColor3f(255.0 / 255.0, 245.0 / 255.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (170.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (245.0 / 255.0) * range_max)
+			//glColor3f(255.0 / 255.0, 255.0 / 255.0, 224.0 / 255.0);
+			glColor3f(255.0 / 255.0, 255.0 / 255.0, 0.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (170.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (245.0 / 255.0) * range_max)
+			glColor3f(255.0 / 255.0, 255.0 / 255.0, 224.0 / 255.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (240.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (255.0 / 255.0) * range_max)
+			glColor3f(255.0 / 255.0, 255.0 / 255.0, 240.0 / 255.0);
+
+		else if (rGrid->fireParticles[i]->timeAlive
+				> (240.0 / 255.0) * range_max
+				&& rGrid->fireParticles[i]->timeAlive
+						< (265.0 / 255.0) * range_max)
+			glColor3f(255.0 / 255.0, 255.0 / 255.0, 250.0 / 255.0);
+
+		else {
+			double chance = rand() % 100;
+			if (chance > 30)
+				glColor3f(0.5, 0.5, 0.5);
+			else if (chance > 60)
+				//continue;
+				glColor3f(0.3, 0.3, 0.3);
+			else if (chance > 90)
+				//continue;
+				glColor3f(0.1, 0.1, 0.1);
+			else
+				continue;
+		}
+
 		glVertex2d(pt[0], pt[1]);
 		glEnd();
-		//}
+
 	}
 
 	glPopAttrib();
@@ -811,7 +882,6 @@ void Renderer::drawLevelSetPhi(Grid* rGrid) {
 		for (int j = 0; j < rGrid->nj; j++) {
 
 			double value = rGrid->levelSetPhi(i, j);
-
 
 			if (value >= 5.0) {
 				red = 0.0;

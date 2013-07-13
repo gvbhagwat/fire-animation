@@ -66,8 +66,14 @@ void Grid::initializeGrid() {
 
     // another information stored at the center of the cell hence ni x nj
     this->marker.resize(ni + extra, nj + extra);
-	this->boundary.resize(ni + extra, nj +extra);
-	this->levelSetPhi.resize(ni+extra, nj+extra);
+	this->boundary.resize(ni + extra, nj + extra);
+	this->levelSetPhi.resize(ni + extra, nj + extra);
+	this->levelSetTemp.resize(ni + extra, nj + extra);
+
+	this->velCenter.resize(ni + extra, nj + extra);
+	this->normal.resize(ni + extra, nj + extra);
+	this->omega.resize(ni + extra, nj +extra);
+
 
 
     // next come the pressure solve matrices

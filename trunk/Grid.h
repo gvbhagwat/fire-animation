@@ -62,6 +62,10 @@ public:
     /// @brief temp velocities may be helpful in advection
     matrix<double> temp_u, temp_v;
     
+    matrix<Vec2d> velCenter;
+    matrix<Vec2d> normal;
+    matrix<double> omega;
+
     /// @brief advection weights
     matrix<double> advectionWeights;
 
@@ -72,7 +76,8 @@ public:
 	matrix<int> boundary;
 
 	///@brief levelSetPhi
-	matrix<int> levelSetPhi;
+	matrix<double> levelSetPhi;
+	matrix<double> levelSetTemp;
     
     /// @brief temperature for the flame
     matrix<double> temperature;

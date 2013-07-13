@@ -20,6 +20,8 @@ public:
     double timeAlive;
     double y;
     double temp;
+    double u;
+    double v;
 
 
 };
