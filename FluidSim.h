@@ -31,7 +31,7 @@ public:
             std::cout << "--META--\tConstructor\tFluidSim" << std::endl;
 
         //invalid value at initialization.. to be correctly given by the initialize()
-        this->startTime = this->endTime = this->dt = -1.0;
+        this->startTime = this->endTime = this->dt = -1.0;fbuoy = 9.8;
 
     }
 
@@ -55,11 +55,15 @@ public:
     /// @brief initialize the fluid body as per required configurations, currently done by particles
     void initializeFluidBody(int choice);
 
+    void constructLevelSetPhi();
+
     /// @brief the startTime and endTime of the simulation
     double startTime, endTime;
 
     /// @brief the time sub step fpr which the simulation is performed, enforced by cfl()
     double dt;
+
+    double fbuoy;
 
 protected:
 
@@ -98,6 +102,8 @@ protected:
      */
     void advectParticles();
 
+    void advectLevelSetPhi();
+
     /**
      * @brief The marker and cell method's marker routines
      *
@@ -108,7 +114,7 @@ protected:
      * @brief construct level sets
      *
      */
-    void constructLevelSetPhi();
+
 
     void applyBoundaryConditions();
 
@@ -129,20 +135,24 @@ protected:
     // VELOCITY EXTRAPOLATION
     void constrainVelocity();
 
+    void calculateNormal();
+    void calculateCenterVelocityField();
+    void confineVorticity();
 
 
 
 
-    void myProject();
-    // HELPER FUNCTIONS
-    void calculateNegativeDivergence();
-    void formCoefficientMatrixA();
-    void formMyPreConditioner();
-    void applyMyPreconditioner();
-    void applyMyA();
-    void solveForPressure();
-    void updateVelocitiesFromPressure();
-    
+
+//    void myProject();
+//    // HELPER FUNCTIONS
+//    void calculateNegativeDivergence();
+//    void formCoefficientMatrixA();
+//    void formMyPreConditioner();
+//    void applyMyPreconditioner();
+//    void applyMyA();
+//    void solveForPressure();
+//    void updateVelocitiesFromPressure();
+//
     // helper functions
     double dotProduct(matrix<double> m1, matrix<double> m2);
 

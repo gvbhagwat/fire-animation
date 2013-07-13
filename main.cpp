@@ -79,6 +79,8 @@ void init() {
     // initialize the fluidBody
     sim->initializeFluidBody(2);
 
+    //sim->constructLevelSetPhi();
+
     // MOCK TEST
     // sim->advance(grid,timestep);
 
