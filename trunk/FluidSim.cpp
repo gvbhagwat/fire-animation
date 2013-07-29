@@ -24,7 +24,7 @@ namespace ublas = boost::numeric::ublas;
  **************************************************************************
  * 1. initialize
  * 2. initializeSolidBoundaries
- * 3. initializeFluidBody
+ * 3. initializeFluidBo
  **************************************************************************/
 
 /**
@@ -492,7 +492,7 @@ void FluidSim::advectParticles() {
 		if (rGrid.marker(i, j) == SOLID
 				&& rGrid.makeFlammableBoundary == false) {
 			//rGrid.flammable(i, j) = true;
-			rGrid.makeFlammableBoundary = false;
+			rGrid.makeFlammableBoundary = true;
 		}
 
 		rGrid.fireParticles[fp]->pos = rGrid.trace_rk2(
