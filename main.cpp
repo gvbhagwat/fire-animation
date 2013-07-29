@@ -37,7 +37,7 @@ int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
 
 
-bool recording=true;
+bool recording=false;
 unsigned int framenum=0;
 unsigned char *pRGB;
 

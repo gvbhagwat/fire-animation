@@ -36,9 +36,10 @@ Renderer::Renderer() {
 	cellSize = RENDER_SIZE_CELL;
 
 	this->optionDrawGridCells = false;
-	this->optionDrawFluidBody = false;
+	this->optionDrawFluidBody = true;
 	this->optionDrawFlipParticles = false;
-	this->optionDrawPressure = true;
+	this->optionDrawPressure = false
+			;
 	this->optionDrawVelocity = false;
 	this->optionDrawSimBoundary = false;
 	this->optionDrawLevelSetPhi = false;
