@@ -36,9 +36,9 @@ Renderer::Renderer() {
 	cellSize = RENDER_SIZE_CELL;
 
 	this->optionDrawGridCells = false;
-	this->optionDrawFluidBody = true;
+	this->optionDrawFluidBody = false;
 	this->optionDrawFlipParticles = false;
-	this->optionDrawPressure = false;
+	this->optionDrawPressure = true;
 	this->optionDrawVelocity = false;
 	this->optionDrawSimBoundary = false;
 	this->optionDrawLevelSetPhi = false;
@@ -79,8 +79,16 @@ void Renderer::drawSimulationEnitites(Grid* rGrid) {
 	for (int i = 0; i < rGrid->ni; i++) {
 		for (int j = 0; j < rGrid->nj; j++) {
 
-			if (rGrid->marker(i, j) == 2)
-				red = green = blue = 0.75; //GRAY
+			if (rGrid->marker(i, j) == 2){
+				red = 0.55;
+				green = 0.55;
+				blue = 0.55; //GRAY
+				if ( i > 3 && i < rGrid->ni-2 && j > 3 && j < rGrid->ni -2 )
+					blue = 1.0;
+
+			}
+
+
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glBegin(GL_POLYGON);
@@ -93,6 +101,9 @@ void Renderer::drawSimulationEnitites(Grid* rGrid) {
 
 			red = green = blue = 0.0;
 		}
+
+		//this->drawSmokeDensity(rGrid);
+
 	}
 
 	this->drawMarkerParticles(rGrid);
@@ -194,57 +205,65 @@ void Renderer::drawFluidBody(Grid* rGrid) {
  * @see Grid Class
  */
 void Renderer::drawPressure(Grid* rGrid) {
-	if (META_LOG)
-		std::cout << "--META--\tFunctionCall\tRenderer::drawPressure"
-				<< std::endl;
-	int ni = rGrid->ni;
-	int nj = rGrid->nj;
+	 if (META_LOG)
+	        std::cout << "--META--\tFunctionCall\tRenderer::drawPressure" << std::endl;
+	    int ni = rGrid->ni;
+	    int nj = rGrid->nj;
 
-	double maxPressure = 0.0;
-	for (int i = 0; i < rGrid->ni; i++)
-		for (int j = 0; j < rGrid->nj; j++)
-			maxPressure = (
-					maxPressure > rGrid->temp_pressure(i, j) ?
-							maxPressure : rGrid->temp_pressure(i, j));
+	    double maxPressure = -100000.0;
+		double minPressure = 100000.0;
 
-	//cout<<"max Pressure is = "<<maxPressure<<endl;
-
-	double red = 0.0, green = 0.0, blue = 0.0;
-
-	for (int i = 0; i < ni; i++) {
-		for (int j = 0; j < nj; j++) {
-
-			if (rGrid->temp_pressure(i, j) > 0.0
-					&& rGrid->temp_pressure(i, j) < maxPressure / 3.0) {
-				red = 1.0;
-				green = 0.0;
-				blue = 0.0;
-			} else if (rGrid->temp_pressure(i, j) >= maxPressure / 3.0
-					&& rGrid->temp_pressure(i, j) < maxPressure * 2.0 / 3.0) {
-				red = .0;
-				green = 1.0;
-				blue = 0.0;
-			} else if (rGrid->temp_pressure(i, j) >= maxPressure * 2.0 / 3.0) {
-
-				red = 0.0;
-				green = 0.0;
-				blue = 1.0;
+	    for (int i = 0; i < rGrid->ni; i++)
+	        for (int j = 0; j < rGrid->nj; j++){
+	            maxPressure = (maxPressure > rGrid->temp_pressure(i, j) ? maxPressure : rGrid->temp_pressure(i, j));
+	            minPressure = (minPressure < rGrid->temp_pressure(i, j) ? minPressure : rGrid->temp_pressure(i, j));
 			}
 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			glBegin(GL_POLYGON);
-			glColor3d(red, green, blue);
-			glVertex3d(j * (cellSize), (cellSize + cellSize * i), 0.0);
-			glVertex3d(j * (cellSize), (0.0 + cellSize * i), 0.0);
-			glVertex3d((j + 1) * (cellSize), (0.0 + cellSize * i), 0.0);
-			glVertex3d((j + 1) * (cellSize), (cellSize + cellSize * i), 0.0);
-			glEnd();
 
-			red = green = blue = 0.0;
-		}
-	}
-	if (RENDER_LOG)
-		std::cout << "--RENDER--\tpressure NOT drawn yet" << std::endl;
+	    //cout<<"max Pressure is = "<<maxPressure<<endl;
+
+	    double red = 0.0, green = 0.0, blue = 0.0;
+
+	    for (int i = 0; i < ni; i++) {
+	        for (int j = 0; j < nj; j++) {
+
+
+				red = green = abs(rGrid->temp_pressure(i,j))/ (maxPressure - minPressure + 0.000000001) ;
+
+				/*
+	            if (rGrid->temp_pressure(i, j) > 0.0 && rGrid->temp_pressure(i, j) < maxPressure / 3.0) {
+	                red = 1.0;
+	                green = 0.0;
+	                blue = 0.0;
+	            } else if (rGrid->temp_pressure(i, j) >= maxPressure / 3.0 && rGrid->temp_pressure(i, j) < maxPressure * 2.0 / 3.0) {
+	                red = .0;
+	                green = 1.0;
+	                blue = 0.0;
+	            } else if (rGrid->temp_pressure(i, j) >= maxPressure * 2.0 / 3.0) {
+
+	                red = 0.0;
+	                green = 0.0;
+	                blue = 1.0;
+	            }
+				*/
+
+	            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	            glBegin(GL_POLYGON);
+	            glColor3d(red, green, blue);
+	            glVertex3d(j * (cellSize), (cellSize + cellSize * i), 0.0);
+	            glVertex3d(j * (cellSize), (0.0 + cellSize * i), 0.0);
+	            glVertex3d((j + 1)*(cellSize), (0.0 + cellSize * i), 0.0);
+	            glVertex3d((j + 1)*(cellSize), (cellSize + cellSize * i), 0.0);
+	            glEnd();
+
+	            red = green = blue = 0.0;
+	        }
+	    }
+
+		this->drawResultantVelocity(rGrid);
+
+	    if (RENDER_LOG)
+	        std::cout << "--RENDER--\tpressure NOT drawn yet" << std::endl;
 }
 
 /**************************************************************************
@@ -593,6 +612,8 @@ void Renderer::drawMarkerParticles(Grid* rGrid) {
 			glColor3f(255.0 / 255.0, 255.0 / 255.0, 250.0 / 255.0);
 
 		else {
+			if(rGrid->fireParticles[i]->pos[1]/ rGrid->dx > rGrid->ni - 2 )
+				continue;
 			double chance = rand() % 100;
 			if (chance > 30)
 				glColor3f(0.5, 0.5, 0.5);
@@ -614,6 +635,7 @@ void Renderer::drawMarkerParticles(Grid* rGrid) {
 	glPopAttrib();
 }
 
+/*
 void Renderer::drawFlipParticles(Grid* rGrid) {
 
 	double scaleFactor = rGrid->dx / cellSize;
@@ -631,6 +653,7 @@ void Renderer::drawFlipParticles(Grid* rGrid) {
 	glPopAttrib();
 
 }
+*/
 
 /**
  * Simply draws the grid according to the RENDER_SIZE cell size that specifies
@@ -883,61 +906,63 @@ void Renderer::drawLevelSetPhi(Grid* rGrid) {
 
 			double value = rGrid->levelSetPhi(i, j);
 
-			if (value >= 5.0) {
-				red = 0.0;
-				green = 0.0;
-				blue = 0.0;
-			} else if (value >= 4.0 && value < 5.0) {
-				red = 176.0 / 255.0;
-				green = 14.0 / 255.0;
-				blue = 14.0 / 255.0;
 
-			} else if (value >= 3.0 && value < 4.0) {
-				red = 178.0 / 255.0;
-				green = 34.0 / 255.0;
-				blue = 34.0 / 255.0;
+			 if (value >= 5.0) {
+			 red = 0.0;
+			 green = 0.0;
+			 blue = 0.0;
+			 } else if (value >= 4.0 && value < 5.0) {
+			 red = 176.0 / 255.0;
+			 green = 14.0 / 255.0;
+			 blue = 14.0 / 255.0;
 
-			} else if (value >= 2.0 && value < 3.0) {
-				red = 1.0;
-				green = 127.0 / 255.0;
-				blue = 80.0 / 255.0;
-			} else if (value >= 1.0 && value < 2.0) {
-				red = 1.0;
-				green = 20.0 / 255.0;
-				blue = 60.0 / 255.0;
-			} else if (value > -1.0 && value < 1.0) {
-				red = 0.0;
-				green = 0.0;
-				blue = 0.5;
-			} else if (value <= -1.0 && value > -2.0) {
-				red = 0.0;
-				green = 0.0;
-				blue = 190.0 / 255.0;
-			} else if (value <= -2.0 && value > -3.0) {
-				red = 0.0;
-				green = 0.0;
-				blue = 1.0;
-			} else if (value <= -3.0 && value > -4.0) {
-				red = 30.0 / 255.0;
-				green = 144.0 / 255.0;
-				blue = 1.0;
-			} else if (value <= -3.0 && value > -4.0) {
-				red = 30.0 / 255.0;
-				green = 191.0 / 255.0;
-				blue = 250.0 / 255.0;
-			} else if (value <= -4.0 && value > -5.0) {
-				red = 135.0 / 255.0;
-				green = 206.0 / 255.0;
-				blue = 250.0 / 255.0;
-			} else if (value <= -5.0) {
-				red = 185.0 / 255.0;
-				green = 220.0 / 255.0;
-				blue = 255.0 / 255.0;
-			}
+			 } else if (value >= 3.0 && value < 4.0) {
+			 red = 178.0 / 255.0;
+			 green = 34.0 / 255.0;
+			 blue = 34.0 / 255.0;
+
+			 } else if (value >= 2.0 && value < 3.0) {
+			 red = 1.0;
+			 green = 127.0 / 255.0;
+			 blue = 80.0 / 255.0;
+			 } else if (value >= 1.0 && value < 2.0) {
+			 red = 1.0;
+			 green = 20.0 / 255.0;
+			 blue = 60.0 / 255.0;
+			 } else if (value > -1.0 && value < 1.0) {
+			 red = 0.0;
+			 green = 0.0;
+			 blue = 0.5;
+			 } else if (value <= -1.0 && value > -2.0) {
+			 red = 0.0;
+			 green = 0.0;
+			 blue = 190.0 / 255.0;
+			 } else if (value <= -2.0 && value > -3.0) {
+			 red = 0.0;
+			 green = 0.0;
+			 blue = 1.0;
+			 } else if (value <= -3.0 && value > -4.0) {
+			 red = 30.0 / 255.0;
+			 green = 144.0 / 255.0;
+			 blue = 1.0;
+			 } else if (value <= -3.0 && value > -4.0) {
+			 red = 30.0 / 255.0;
+			 green = 191.0 / 255.0;
+			 blue = 250.0 / 255.0;
+			 } else if (value <= -4.0 && value > -5.0) {
+			 red = 135.0 / 255.0;
+			 green = 206.0 / 255.0;
+			 blue = 250.0 / 255.0;
+			 } else if (value <= -5.0) {
+			 red = 185.0 / 255.0;
+			 green = 220.0 / 255.0;
+			 blue = 255.0 / 255.0;
+			 }
+
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glBegin(GL_POLYGON);
-			glColor3d(red, green, blue);
+			glColor4d(red, green, blue, 0.9);
 			glVertex3d(j * (cellSize), (cellSize + cellSize * i), 0.0);
 			glVertex3d(j * (cellSize), (0.0 + cellSize * i), 0.0);
 			glVertex3d((j + 1) * (cellSize), (0.0 + cellSize * i), 0.0);
@@ -955,3 +980,33 @@ void Renderer::drawLevelSetPhi(Grid* rGrid) {
 
 }
 
+void Renderer::drawSmokeDensity(Grid* rGrid) {
+	double red = 0.0, green = 0.0, blue = 0.0;
+
+	double minVal = 0; double maxVal= 0;
+	for (int i = 0; i < rGrid->ni; i++) {
+		for (int j = 0; j < rGrid->nj; j++) {
+
+			double value = rGrid->smokeDensity(i,j);
+			minVal = value < minVal? value: minVal;
+			maxVal = value > maxVal? value: maxVal;
+
+			double color = value > 50? 0: (10 -value)/10;
+
+			red=green=blue=color;
+
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glBegin(GL_POLYGON);
+			glColor4d(red, green, blue, 0.3);
+			glVertex3d(j * (cellSize), (cellSize + cellSize * i), 0.0);
+			glVertex3d(j * (cellSize), (0.0 + cellSize * i), 0.0);
+			glVertex3d((j + 1) * (cellSize), (0.0 + cellSize * i), 0.0);
+			glVertex3d((j + 1) * (cellSize), (cellSize + cellSize * i), 0.0);
+			glEnd();
+
+			red = green = blue = 0.0;
+		}
+	}
+
+	//cout<<"min "<<minVal<<" max "<<maxVal<<endl;
+}

@@ -45,6 +45,8 @@ void FluidSim::initialize(double pStartTime, double pEndTime) {
 	// First Initialize the Grid
 	rGrid.initializeGrid();
 
+	rGrid.makeFlammableBoundary = false;
+
 	//Initialize the simulation times
 	startTime = pStartTime;
 	endTime = pEndTime;
@@ -64,8 +66,8 @@ void FluidSim::initializeSolidBoundaries() {
 
 	// Note:
 	// One may wonder why there are 8 for loops ?? it
-	// can be done by one for loop and if
 	// But this is efficient by both fast mem access and time [saving if(s)]
+	// can be done by one for loop and if
 
 	// FIRST
 	// Mark the solid cells
@@ -115,28 +117,69 @@ void FluidSim::initializeSolidBoundaries() {
 
 	// add custom boundary
 
-	for (int y = rGrid.ni / 2; y < rGrid.ni / 2 + 2; y++)
-		for (int x = rGrid.nj / 2 - 1; x < rGrid.nj / 2 + 1; x++) {
-			//rGrid.marker(y, x) = SOLID;
 
-			/*
-			rGrid.u(y, x) = 0.0;
-			rGrid.u(y + 1, x) = 0.0;
-			rGrid.v(y, x) = 0.0;
-			rGrid.v(y + 1, x) = 0.0;
-			*/
+	int x_lower = 1;
+	int x_upper = 1;
 
-			/*
-			 rGrid.u(y, x) = -rGrid.u(y, x);
-			 rGrid.u(y + 1, x) = -rGrid.u(y, x);
-			 rGrid.v(y, x) = -rGrid.v(y, x);
-			 rGrid.v(y + 1, x) = -rGrid.v(y, x);
-			 */
+	int x_ref = 18;
+	int y_ref = 18;
+
+	for (int y = y_ref; y < y_ref + 2; y++)
+		for (int x = x_ref - x_lower; x < x_ref + x_upper; x++) {
+
+			//cout << "y" << y << "x " << x << endl;
+			rGrid.marker(y, x) = SOLID;
+
+			rGrid.u(y, x) = 0;
+			rGrid.u(y, x + 1) = 0;
+
 		}
+
+	for (int y = y_ref; y < y_ref + 2; y++)
+		for (int x = x_ref - x_lower; x < x_ref + x_upper; x++) {
+
+			//cout << "y" << y << "x " << x << endl;
+			rGrid.marker(y, x) = SOLID;
+
+			rGrid.v(y, x) = -rGrid.v(y, x);
+			rGrid.v(y + 1, x) = -rGrid.v(y + 1, x);
+
+		}
+
+	x_lower = 1;
+	x_upper = 1;
+
+	x_ref = 22;
+	y_ref = 25;
+
+	for (int y = y_ref; y < y_ref + 2; y++)
+		for (int x = x_ref - x_lower; x < x_ref + x_upper; x++) {
+
+			//cout << "y" << y << "x " << x << endl;
+			rGrid.marker(y, x) = SOLID;
+
+			rGrid.u(y, x) = -rGrid.u(y, x);
+			rGrid.u(y, x + 1) = -rGrid.u(y, x + 1);
+
+		}
+
+	for (int y = y_ref; y < y_ref + 2; y++)
+		for (int x = x_ref - x_lower; x < x_ref + x_upper; x++) {
+
+			//cout << "y" << y << "x " << x << endl;
+			rGrid.marker(y, x) = SOLID;
+
+			rGrid.v(y, x) = -rGrid.v(y, x);
+			rGrid.v(y + 1, x) = -rGrid.v(y + 1, x);
+
+		}
+
+
+
 }
 
 /**
- * 
+ *
  * @param grid
  * @param choice
  */
@@ -191,7 +234,6 @@ void FluidSim::initializeFluidBody(int choice) {
 		lowerBound_x = 0.6;
 		lowerBound_y = rGrid.dx + rGrid.dx / 2.0;
 		upperBound_x = 1.0 - rGrid.dx - rGrid.dx / 2.0;
-		//upperBound_x = 0.7;
 		upperBound_y = 1.0 - rGrid.dx - rGrid.dx / 2.0;
 
 		for (int i = 0; i < sqr(rGrid.ni) * 16; ++i) {
@@ -204,8 +246,9 @@ void FluidSim::initializeFluidBody(int choice) {
 
 			if (xpos > lowerBound_x && xpos < upperBound_x
 					&& ypos < upperBound_y && ypos > lowerBound_y) {
+
 				Vec2d pt(xpos, ypos);
-				//rGrid.markerParticles.push_back(pt);
+
 				Particles* p = new Particles(pt);
 				if (p != NULL)
 					rGrid.fireParticles.push_back(p);
@@ -222,7 +265,6 @@ void FluidSim::initializeFluidBody(int choice) {
 		lowerBound_x = 0.45;
 		lowerBound_y = 1.5 * rGrid.dx + rGrid.dx / 2.0;
 		upperBound_x = 0.65;
-		//upperBound_x = 0.7;
 		upperBound_y = 0.15;
 
 		for (int i = 0; i < sqr(rGrid.ni) * 16; ++i) {
@@ -247,9 +289,37 @@ void FluidSim::initializeFluidBody(int choice) {
 
 		}
 
+		if (rGrid.makeFlammableBoundary == true) {
+			lowerBound_x = 0.425;
+			lowerBound_y = 0.425;
+			upperBound_x = 0.485;
+			upperBound_y = 0.485;
+
+			for (int i = 0; i < sqr(rGrid.ni) * 32; ++i) {
+				float xpos = randhashf(i * 2, 0, 1);
+				float ypos = randhashf(i * 2 + 1, 0, 1);
+
+				// the grid space is normalized from 0.0 to 1.0 in both directions
+				// x and y.
+				// each cell is of dimension (rGrid.dx X rGrid.dx)
+
+				if (xpos > lowerBound_x && xpos < upperBound_x
+						&& ypos < upperBound_y && ypos > lowerBound_y) {
+
+					//cout<<"true"<<endl;
+					Vec2d pt(xpos, ypos);
+
+					Particles* p = new Particles(pt);
+					if (p != NULL)
+						rGrid.fireParticles.push_back(p);
+					else
+						cout << "BIG ERROR";
+				}
+
+			}
+		}
 		break;
 
-		// DAM_BREAK_OBSTACLE
 	case 3:
 		break;
 
@@ -285,7 +355,7 @@ void FluidSim::initializeFluidBody(int choice) {
 }
 
 /**************************************************************************
- * THE CORE SIMULATION ROUTINES    
+ * T	HE CORE SIMULATION ROUTINES
  **************************************************************************
  * 0. cfl
  * 1. advance
@@ -294,13 +364,13 @@ void FluidSim::initializeFluidBody(int choice) {
  *    1.3 advect
  *    1.4 addForces
  *    1.5 project
- *    1.6 markFluidCells  
+ *    1.6 markFluidCells
  **************************************************************************/
 
 /**
- * 
  *
- * @return 
+ *
+ * @return
  */
 double FluidSim::cfl() {
 	if (META_LOG)
@@ -336,17 +406,16 @@ void FluidSim::advance(double timestep) {
 				<< startTime + timestep << std::endl;
 
 	double t = 0;
-	//int count = 10;
-	//constructLevelSetPhi();
-	//constructLevelSetPhi();
+
 	constructLevelSetPhi();
-	//this->constructLevelSetPhi();
+
 	while (t < timestep) {
 		dt = cfl();
 		if (t + dt > timestep)
 			dt = timestep - t;
 
 		this->initializeFluidBody(2);
+
 
 		// passively advect the particles
 		advectParticles();
@@ -364,23 +433,10 @@ void FluidSim::advance(double timestep) {
 
 		// apply boundary conditions
 		applyBoundaryConditions();
-
-		/*
-		 count--;
-		 if (count == 0) {
-		 // construct the level sets
-		 constructLevelSetPhi();
-		 count = 50;
-		 }
-		 */
-		//constructLevelSetPhi();
-		// apply boundary conditions
 		applyBoundaryConditions();
 
 		// make fluid incompressible
 		project();
-
-		//myProject();
 
 		// apply boundary conditions
 		applyBoundaryConditions();
@@ -392,10 +448,6 @@ void FluidSim::advance(double timestep) {
 
 }
 
-/**
- * 
- *
- */
 void FluidSim::clearMarkedFluidCells() {
 
 	for (int y = 0; y < rGrid.ni; y++)
@@ -407,7 +459,8 @@ void FluidSim::clearMarkedFluidCells() {
 }
 
 /**
- * Perform 2nd order Runge-Kutta to move the particles in the fluid
+ * Perform 2nd order Runge-Kutta to move the particle23m
+ * mM s in the fluid
  *
  */
 void FluidSim::advectParticles() {
@@ -416,27 +469,41 @@ void FluidSim::advectParticles() {
 
 	rGrid.advectionWeights.clear();
 
+	rGrid.flammable.clear();
+
 	for (unsigned int fp = 0; fp < rGrid.fireParticles.size(); ++fp) {
-
 		rGrid.fireParticles[fp]->timeAlive += dt;
+
 		double yPos = rGrid.fireParticles[fp]->pos[0];
+		double xPos = rGrid.fireParticles[fp]->pos[1];
 
-		if (rGrid.fireParticles[fp]->timeAlive > FLAME_HEIGHT * 1.4
-				|| yPos / rGrid.dx > (rGrid.ni - 1)) {
-
-			rGrid.fireParticles.erase(rGrid.fireParticles.begin() + fp);
-
+		if (FLAME_HEIGHT > 0.4) {
+			if (rGrid.fireParticles[fp]->timeAlive > FLAME_HEIGHT * 1.4
+					|| yPos / rGrid.dx > (rGrid.ni - 2))
+				rGrid.fireParticles.erase(rGrid.fireParticles.begin() + fp);
 		} else {
-			rGrid.fireParticles[fp]->pos = rGrid.trace_rk2(
-					rGrid.fireParticles[fp]->pos, dt);
-
-			if ((rGrid.fireParticles[fp]->pos[0] / rGrid.dx) > rGrid.ni - 1)
-				rGrid.fireParticles[fp]->pos[0] = ((rGrid.ni - 1) * rGrid.dx)
-						- rGrid.dx / 2.0;
-			if ((rGrid.fireParticles[fp]->pos[1] / rGrid.dx) > rGrid.nj - 1)
-				rGrid.fireParticles[fp]->pos[1] = ((rGrid.nj - 1) * rGrid.dx)
-						- rGrid.dx / 2.0;
+			if (yPos / rGrid.dx > (rGrid.ni - 2))
+				rGrid.fireParticles.erase(rGrid.fireParticles.begin() + fp);
 		}
+
+		int i = yPos / rGrid.dx;
+		int j = xPos / rGrid.dx;
+
+		if (rGrid.marker(i, j) == SOLID
+				&& rGrid.makeFlammableBoundary == false) {
+			//rGrid.flammable(i, j) = true;
+			rGrid.makeFlammableBoundary = false;
+		}
+
+		rGrid.fireParticles[fp]->pos = rGrid.trace_rk2(
+				rGrid.fireParticles[fp]->pos, dt);
+
+		if ((rGrid.fireParticles[fp]->pos[0] / rGrid.dx) > rGrid.ni - 1)
+			rGrid.fireParticles[fp]->pos[0] = ((rGrid.ni - 1) * rGrid.dx)
+					- rGrid.dx / 2.0;
+		if ((rGrid.fireParticles[fp]->pos[1] / rGrid.dx) > rGrid.nj - 1)
+			rGrid.fireParticles[fp]->pos[1] = ((rGrid.nj - 1) * rGrid.dx)
+					- rGrid.dx / 2.0;
 
 	}
 }
@@ -450,14 +517,14 @@ void FluidSim::advect() {
 		std::cout << "--SIMLOG-- normal advection routine finished"
 				<< std::endl;
 
-	//semi-Lagrangian advection on u-component of velocity
+//semi-Lagrangian advection on u-component of velocity
 
-	// remember y is the rows in y axis
-	// information above
-	// x is columns in x axis..
-	// information to the right
+// remember y is the rows in y axis
+// information above
+// x is columns in x axis..
+// information to the right
 
-	// u has extra information in x direction or in columns
+// u has extra information in x direction or in columns
 	for (int y = 0; y < rGrid.ni; ++y)
 		for (int x = 0; x < rGrid.nj + 1; ++x) {
 			Vec2d pos((x + 0.5) * rGrid.dx, y * rGrid.dx);
@@ -465,17 +532,17 @@ void FluidSim::advect() {
 			rGrid.temp_u(y, x) = rGrid.getVelocity(pos)[0];
 		}
 
-	//semi-Lagrangian advection on v-component of velocity
+//semi-Lagrangian advection on v-component of velocity
 
-	// remember y is the rows in y axis
-	// information above
-	// x is columns in x axis..
-	// information to the right
+// remember y is the rows in y axis
+// information above
+// x is columns in x axis..
+// information to the right
 
-	//rGrid.advectionWeights.clear();
-	//std::cout<<"step_Break"<<endl;
+//rGrid.advectionWeights.clear();
+//std::cout<<"step_Break"<<endl;
 
-	// v has extra information in y direction or in rows
+// v has extra information in y direction or in rows
 	for (int y = 0; y < rGrid.ni + 1; ++y)
 		for (int x = 0; x < rGrid.nj; ++x) {
 			Vec2d pos(x * rGrid.dx, (y + 0.5) * rGrid.dx);
@@ -483,7 +550,7 @@ void FluidSim::advect() {
 			rGrid.temp_v(y, x) = rGrid.getVelocity(pos)[1];
 		}
 
-	// semi-Lagrangian advection for the levelSetPhi
+// semi-Lagrangian advection for the levelSetPhi
 	for (int y = 0; y < rGrid.ni; ++y)
 		for (int x = 0; x < rGrid.nj; ++x) {
 			Vec2d pos(x * rGrid.dx, (y + 0.5) * rGrid.dx);
@@ -492,7 +559,7 @@ void FluidSim::advect() {
 		}
 	rGrid.levelSetPhi = rGrid.levelSetTemp;
 
-	//move update velocities into u/v vectors
+//move update velocities into u/v vectors
 	rGrid.u = rGrid.temp_u;
 	rGrid.v = rGrid.temp_v;
 
@@ -507,6 +574,7 @@ void FluidSim::calculateCenterVelocityField() {
 			double u1 = rGrid.u(y, x);
 			double u2 = rGrid.u(y, x + 1);
 			rGrid.velCenter(y, x)[0] = lerp(u1, u2, 0.5);
+
 		}
 
 	for (int y = 0; y < rGrid.ni; y++)
@@ -576,16 +644,16 @@ void FluidSim::confineVorticity() {
  */
 void FluidSim::addForces() {
 
-	// remember y is the rows in y axis
-	// information above
-	// x is columns in x axis..
+// remember y is the rows in y axis
+// information above
+// x is columns in x axis..
 
-	// information to the right
+// information to the right
 
 	this->calculateCenterVelocityField();
 	this->calculateNormal();
 
-	// max rows in v are ni+1 or y ranges from o to ni
+// max rows in v are ni+1 or y ranges from o to ni
 	for (int y = 0; y < rGrid.ni; y++)
 		for (int x = 0; x < rGrid.nj; x++) {
 
@@ -634,31 +702,31 @@ void FluidSim::addForces() {
 }
 
 /**
- * 
+ *
  * @param grid
  */
 void FluidSim::applyBoundaryConditions() {
 
-	// Bottom Boundary
+// Bottom Boundary
 	for (int y = 0; y < 2; y++)
 		for (int x = 0; x < rGrid.nj; x++)
 			rGrid.v(y, x) = 0.0;
 
-	// Top Boundary
-	// here y must have values ni-1 and ni
-	// this is because v has extra information on upper Boundary (ni+1)
+// Top Boundary
+// here y must have values ni-1 and ni
+// this is because v has extra information on upper Boundary (ni+1)
 	for (int y = rGrid.ni - 1; y < rGrid.ni + 1; y++)
 		for (int x = 0; x < rGrid.nj; x++)
 			rGrid.v(y, x) = 0.0;
 
-	// Left Boundary
+// Left Boundary
 	for (int y = 0; y < rGrid.ni; y++)
 		for (int x = 0; x < 2; x++)
 			rGrid.u(y, x) = 0.0;
 
-	// Right Boundary
-	// here y must have values nj-1 and nj
-	// this is because v has extra information on right Boundary (nj+1)
+// Right Boundary
+// here y must have values nj-1 and nj
+// this is because v has extra information on right Boundary (nj+1)
 	for (int y = 0; y < rGrid.ni; y++)
 		for (int x = rGrid.nj - 1; x < rGrid.nj + 1; x++)
 			rGrid.u(y, x) = 0.0;
@@ -668,20 +736,23 @@ void FluidSim::applyBoundaryConditions() {
 }
 
 /**
- * 
+ *
  * @param grid
  */
 void FluidSim::markFluidCells() {
 
-	// first clear all the past marker cells
+// first clear all the past marker cells
 	rGrid.marker.clear();
 
-	// clear the boundary markers
+	this->initializeSolidBoundaries();
+
+// clear the boundary markers
 	rGrid.boundary.clear();
 
-	// first detect potential cells from the particles themselves
+// first detect potential cells from the particles themselves
 
 	for (unsigned int i = 0; i < rGrid.fireParticles.size(); i++) {
+
 		Vec2d pos(rGrid.fireParticles[i]->pos / rGrid.dx);
 		int x = int(pos[0]);
 		int y = int(pos[1]);
@@ -689,8 +760,8 @@ void FluidSim::markFluidCells() {
 		rGrid.marker(y, x) = FLUID; // means fluid cells
 	}
 
-	// Updating fluid marker cells on basis of eight neighbor count
-	// for internal cells i.e. within the boundary
+// Updating fluid marker cells on basis of eight neighbor count
+// for internal cells i.e. within the boundary
 
 	int eight_neighbor_count = 0;
 	int four_neighbor_count = 0;
@@ -723,19 +794,6 @@ void FluidSim::markFluidCells() {
 
 		}
 
-	// set boundary cell markers to SOLID
-	for (int x = 0; x < rGrid.nj; x++)
-		rGrid.marker(0, x) = SOLID;
-
-	//for (int x = 0; x < rGrid.nj; x++)
-	//	rGrid.marker(rGrid.ni - 1, x) = SOLID;
-
-	for (int y = 0; y < rGrid.ni; y++)
-		rGrid.marker(y, 0) = SOLID;
-
-	for (int y = 0; y < rGrid.ni; y++)
-		rGrid.marker(rGrid.nj - 1, 0) = SOLID;
-
 }
 
 void FluidSim::constructLevelSetPhi() {
@@ -746,7 +804,9 @@ void FluidSim::constructLevelSetPhi() {
 	std::stack<int> yPhi;
 	std::stack<int> xPhi;
 
-	// Preparation
+	int band = 5;
+
+// Preparation
 	for (int y = 0; y < rGrid.ni; y++)
 		for (int x = 0; x < rGrid.nj; x++) {
 			if (rGrid.boundary(y, x) == FLUID) {
@@ -769,8 +829,6 @@ void FluidSim::constructLevelSetPhi() {
 		yPhi.pop();
 		xPhi.pop();
 
-		int band = 5;
-
 		for (int i = -band; i < band; i++)
 			for (int j = -band; j < band; j++) {
 				if ((y + i >= 0) && (y + i < rGrid.ni) && (x + j >= 0)
@@ -791,6 +849,11 @@ void FluidSim::constructLevelSetPhi() {
 
 	}
 
+	for (int y = 0; y < rGrid.ni; y++)
+		for (int x = 0; x < rGrid.nj; x++) {
+			rGrid.smokeDensity(y, x) = rGrid.levelSetPhi(y, x) + band + 1;
+		}
+
 }
 
 /**
@@ -800,15 +863,15 @@ void FluidSim::constructLevelSetPhi() {
 void FluidSim::project() {
 	if (SIM_LOG)
 		std::cout << "--SIMLOG-- Fluid Made incompressible done" << std::endl;
-	// displayverticalVelocities();
+// displayverticalVelocities();
 	findDivergence();
-	// displayDivergence();
+// displayDivergence();
 	formA();
-	// displayPoisson();
+// displayPoisson();
 	formPreconditioner();
-	//displayPreconditioner();
+//displayPreconditioner();
 	solvePressure();
-	//  displayPressure();
+//  displayPressure();
 	applyPressure();
 }
 
@@ -823,7 +886,7 @@ void FluidSim::project() {
  * 6. zdos (called by project)
  * 7. findRinform (called by project)
  * 8. solvePressre
- * 9. applyPressure 
+ * 9. applyPressure
  * 10. formPreconditioner
  **************************************************************************/
 
@@ -833,7 +896,7 @@ void FluidSim::findDivergence() {
 	rGrid.rhs_u_comp.clear();
 	rGrid.rhs_v_comp.clear();
 
-	//double scale = 1.0  / rGrid.dx;
+//double scale = 1.0  / rGrid.dx;
 	double scale = 1.0;
 	for (int y = 0; y < rGrid.nj; y++)
 		for (int x = 0; x < rGrid.ni; x++) {
@@ -853,12 +916,12 @@ void FluidSim::findDivergence() {
 
 void FluidSim::formA() {
 
-	// clearing off everything
+// clearing off everything
 	rGrid.Adiag.clear();
 	rGrid.Aplusi.clear();
 	rGrid.Aplusj.clear();
 
-	// setting up Adiag, Aplusi, Aplusj
+// setting up Adiag, Aplusi, Aplusj
 	for (int y = 1; y < rGrid.ni - 1; y++)
 		for (int x = 1; x < rGrid.nj - 1; x++) {
 			if (rGrid.marker(y, x) == FLUID) {
@@ -882,7 +945,7 @@ void FluidSim::formA() {
 
 void FluidSim::applyA() {
 
-	// clearing z
+// clearing z
 	rGrid.z.clear();
 
 	for (int y = 1; y < rGrid.ni - 1; y++)
@@ -936,7 +999,7 @@ void FluidSim::applyPreconditioner() {
 
 	rGrid.m.clear();
 
-	// solve L*m=r
+// solve L*m=r
 	for (int y = 1; y < rGrid.ni - 1; y++)
 		for (int x = 1; x < rGrid.nj - 1; x++) {
 
@@ -952,7 +1015,7 @@ void FluidSim::applyPreconditioner() {
 			}
 		}
 
-	// solve L'*z=m
+// solve L'*z=m
 
 	rGrid.z.clear();
 
@@ -1016,11 +1079,11 @@ void FluidSim::solvePressure() {
 
 	rGrid.temp_pressure = rGrid.pressure;
 
-	// clear the pressure :P
+// clear the pressure :P
 	rGrid.pressure.clear();
 
 	double tol = 1e-5 * findRInform();
-	//   cout << "maximum r = " << findRInform() << " tol: " << tol << endl;
+//   cout << "maximum r = " << findRInform() << " tol: " << tol << endl;
 	if (findRInform() == 0.0)
 		return;
 
@@ -1107,7 +1170,7 @@ void FluidSim::computeWeights() {
 
 }
 //
-//void FluidSim::myProject() {
+//vo	id FluidSim::myProject() {
 //
 //	// Calculate the negative divergence b rhs) with modifications at the solid-wall boundaries
 //	this->calculateNegativeDivergence();
@@ -1149,7 +1212,7 @@ void FluidSim::computeWeights() {
 //				rGrid.diagnose_u_rhs(y, x) = scale
 //						* (rGrid.u(y, x + 1) - rGrid.u(y, x));
 //				rGrid.diagnose_v_rhs(y, x) = scale
-//						* (rGrid.v(y, x + 1) - rGrid.v(y, x));
+//		we wi				* (rGrid.v(y, x + 1) - rGrid.v(y, x));
 //			}
 //
 //		}

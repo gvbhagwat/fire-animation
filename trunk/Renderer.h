@@ -36,6 +36,7 @@ public:
     bool optionDrawFlipParticles;
     bool optionDrawLevelSetPhi;
 
+
     // marker cells
     bool optionHighlightFluidCells;
 	bool optionHighlightFluidBoundaryCells;
@@ -66,8 +67,10 @@ public:
     void drawResultantVelocity(Grid* rGrid);
 
     void drawFluidBody(Grid* rGrid);
+    void drawSmokeDensity(Grid* rGrid);
 
     void drawLevelSetPhi(Grid* grid);
+
 
     void drawPressure(Grid* rGrid);
     

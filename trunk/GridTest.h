@@ -148,7 +148,8 @@ bool checkRenderingCoordinates(Grid* rGrid) {
             //vel = vel * 0.0005;
             if (mag(vel)) {
                 vel = vel / mag(vel);
-                vel = vel * rGrid->dx * 0.5;
+                vel = vel * rGrid->dx *
+                		0.5;
 
             }
             vel = pos + vel;
