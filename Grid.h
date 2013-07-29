@@ -42,6 +42,8 @@ public:
 
     // DATA MEMBERS
 
+	bool makeFlammableBoundary;
+
     /// @brief the physical dimensions of the simulation domain (x-axis)
     double phyWidth;
     /// @brief the physical dimensions of the simulation domain (x-axis)
@@ -71,6 +73,7 @@ public:
 
     /// @brief marker cells
     matrix<int> marker;
+    matrix<bool> flammable;
 	
 	/// @brief boundary cells
 	matrix<int> boundary;
@@ -78,7 +81,9 @@ public:
 	///@brief levelSetPhi
 	matrix<double> levelSetPhi;
 	matrix<double> levelSetTemp;
+	matrix<double> smokeDensity;
     
+
     /// @brief temperature for the flame
     matrix<double> temperature;
     
@@ -98,16 +103,16 @@ public:
 
     /// @brief auxillary matrices needed for pressure solve
     matrix<double>  Adiag, Aplusi, Aplusj;
-    matrix<double> myAdiag, Aplusy, Aplusx ;
+    //matrix<double> myAdiag, Aplusy, Aplusx ;
     matrix<double> s, z;
     matrix <double> preConditioner, m;
     
-    matrix<double> myPreConditioner, q;
-    matrix<double> residualR, auxillaryZ, searchS;
+    //matrix<double> myPreConditioner, q;
+    //matrix<double> residualR, auxillaryZ, searchS;
     
     
     /// @brief particles for FLIP method
-    std::vector<Vec2d> flipParticles;
+    //std::vector<Vec2d> flipParticles;
 
     /// @brief particles for capturing the fluid entities
      
